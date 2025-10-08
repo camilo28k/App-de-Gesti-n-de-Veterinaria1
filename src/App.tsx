@@ -21,6 +21,7 @@ import './theme/variables.css';
 import CreatePage from './pages/CreatePage';
 import UserList from './pages/UserList';
 import EditPage from './pages/EditPage'; // 🛑 Importar la página de edición
+import DetailPage from './pages/DetailPage';
 
 setupIonicReact();
 
@@ -47,6 +48,9 @@ const App: React.FC = () => (
         {/* Redirección: Al entrar en la raíz (/), redirige al listado de usuarios */}
         <Route exact path="/">
           <Redirect to="/list" />
+        </Route>
+        <Route exact path="/details/:id">
+          <DetailPage />
         </Route>
         
       </IonRouterOutlet>

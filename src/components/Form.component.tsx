@@ -1,4 +1,4 @@
-// src/components/Form.component.tsx
+// src/components/Form.component.tsx (FINAL CORREGIDO)
 
 import React, { useState, useEffect } from 'react';
 import { 
@@ -8,11 +8,10 @@ import {
 import { User } from '../service/LocalStorageService'; 
 import { cloudUploadOutline } from 'ionicons/icons'; 
 import './Form.component.css'; 
+// Importaciones de navegación (no necesarias aquí, pero se mantienen si usaste useHistory)
 
-// 1. Tipo base (lo que onSaveUser espera): Usuario sin ID.
+// Tipos de datos... (Se mantienen iguales)
 type UserDraft = Omit<User, 'id'>;
-
-// 2. Tipo para el estado interno (FormData): Hacemos que 'password' sea opcional para usar 'delete'.
 type FormData = Omit<UserDraft, 'password'> & { password?: string };
 
 interface FormProps {
@@ -56,6 +55,7 @@ export const FormComponent: React.FC<FormProps> = ({
     }
   };
 
+  // 🛑 Función handleSubmit definida correctamente
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -66,7 +66,7 @@ export const FormComponent: React.FC<FormProps> = ({
       
       const dataToSave: FormData = {...formData};
       
-      // LÓGICA DE BORRADO DE CONTRASEÑA: Resuelve el error de TypeScript.
+      // LÓGICA DE BORRADO DE CONTRASEÑA
       if (isEditing && !showPasswordChange && dataToSave.password === '') {
           delete dataToSave.password; 
       }
@@ -92,9 +92,10 @@ export const FormComponent: React.FC<FormProps> = ({
   };
 
   return (
+    // 🛑 CRÍTICO: El botón de submit DEBE estar dentro del <form>
     <form onSubmit={handleSubmit} className="user-form">
       <IonList>
-        {/* Nombre y Email (Desactivados en Edición según image_6d456c.png) */}
+        {/* Nombre y Email (Desactivados en Edición) */}
         <IonItem><IonLabel position="stacked">Nombre completo</IonLabel><IonInput type="text" value={formData.name} onIonChange={(e) => handleChange('name', e.detail.value)} placeholder="Ingrese el nombre completo" required disabled={isEditing} /></IonItem>
         <IonItem><IonLabel position="stacked">Correo electrónico</IonLabel><IonInput type="email" value={formData.email} onIonChange={(e) => handleChange('email', e.detail.value)} placeholder="Ingrese el correo electrónico" required disabled={isEditing} /></IonItem>
         
@@ -160,6 +161,7 @@ export const FormComponent: React.FC<FormProps> = ({
       </IonList>
       
       <div className="ion-padding">
+        {/* 🛑 Botón de Submit: Ahora dentro del <form> */}
         <IonButton expand="block" type="submit" color="success">
           {submitButtonText}
         </IonButton>

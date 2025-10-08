@@ -56,3 +56,11 @@ ion-label p {
     color: var(--ion-color-medium-shade);
     font-size: 0.9rem;
 }
+/* src/pages/UserList.css (o similar) */
+
+.action-buttons-group {
+    display: flex;
+    align-items: center;
+    /* Ajusta el espacio entre los botones si es necesario */
+    gap: 5px; 
+}
