@@ -1,37 +1,26 @@
 import { Redirect, Route } from 'react-router-dom';
 import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
-import Home from './pages/Home';
 
-/* Core CSS required for Ionic components to work properly */
+// Núcleo y utilidades de estilos de Ionic
 import '@ionic/react/css/core.css';
-
-/* Basic CSS for apps built with Ionic */
 import '@ionic/react/css/normalize.css';
 import '@ionic/react/css/structure.css';
 import '@ionic/react/css/typography.css';
-
-/* Optional CSS utils that can be commented out */
 import '@ionic/react/css/padding.css';
 import '@ionic/react/css/float-elements.css';
 import '@ionic/react/css/text-alignment.css';
 import '@ionic/react/css/text-transformation.css';
 import '@ionic/react/css/flex-utils.css';
 import '@ionic/react/css/display.css';
+import '@ionic/react/css/palettes/dark.system.css'; // Opcional, dependiendo de si usas el tema oscuro
 
-/**
- * Ionic Dark Mode
- * -----------------------------------------------------
- * For more info, please see:
- * https://ionicframework.com/docs/theming/dark-mode
- */
-
-/* import '@ionic/react/css/palettes/dark.always.css'; */
-/* import '@ionic/react/css/palettes/dark.class.css'; */
-import '@ionic/react/css/palettes/dark.system.css';
-
-/* Theme variables */
 import './theme/variables.css';
+
+// Importación de las páginas
+import CreatePage from './pages/CreatePage';
+import UserList from './pages/UserList';
+import EditPage from './pages/EditPage'; // 🛑 Importar la página de edición
 
 setupIonicReact();
 
@@ -39,12 +28,27 @@ const App: React.FC = () => (
   <IonApp>
     <IonReactRouter>
       <IonRouterOutlet>
-        <Route exact path="/home">
-          <Home />
+        
+        {/* Ruta de Listado de Usuarios (Vista principal) */}
+        <Route exact path="/list">
+          <UserList />
         </Route>
+        
+        {/* Ruta de Creación de Usuario */}
+        <Route exact path="/create">
+          <CreatePage />
+        </Route>
+
+        {/* 🛑 NUEVA RUTA: Ruta de Edición de Usuario. Usa el parámetro ":id" */}
+        <Route exact path="/edit/:id">
+          <EditPage />
+        </Route>
+        
+        {/* Redirección: Al entrar en la raíz (/), redirige al listado de usuarios */}
         <Route exact path="/">
-          <Redirect to="/home" />
+          <Redirect to="/list" />
         </Route>
+        
       </IonRouterOutlet>
     </IonReactRouter>
   </IonApp>

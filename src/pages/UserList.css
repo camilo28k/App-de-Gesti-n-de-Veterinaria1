@@ -1,0 +1,58 @@
+/* src/pages/UserList.css */
+
+/* Define un color verde personalizado si no está en variables.css */
+/* Usaremos el color que se ve en la imagen: un verde brillante (#28BA62 es un buen candidato para Ionic Success) */
+.user-status.active {
+    /* Usar un color verde brillante, por ejemplo, el success de Ionic o un valor fijo */
+    background-color: #28BA62; /* Verde brillante para ACTIVO */
+}
+
+/* Colores específicos para el estado Inactivo */
+.user-status.inactive {
+    background-color: var(--ion-color-medium); /* Gris de Ionic */
+    color: var(--ion-color-dark); /* Color más oscuro para el texto en gris claro */
+}
+
+/* El resto de tu CSS se mantiene igual... */
+.user-list-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+ion-list {
+    padding: 0 8px;
+    background: transparent; 
+}
+
+ion-item {
+    --padding-start: 16px;
+    --inner-padding-end: 16px;
+    --background: var(--ion-background-color); 
+    border-radius: 10px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+}
+
+.user-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 16px;
+}
+
+.user-status {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: white; 
+    min-width: 60px;
+    text-align: center;
+}
+
+ion-label p {
+    color: var(--ion-color-medium-shade);
+    font-size: 0.9rem;
+}
