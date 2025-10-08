@@ -5,8 +5,8 @@ import {
   IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonList, 
   IonItem, IonLabel, IonNote, IonButtons, IonButton, IonIcon, IonSearchbar 
 } from '@ionic/react';
-import { useHistory } from 'react-router-dom'; 
-import { useIonViewWillEnter } from '@ionic/react'; // 🛑 Importación corregida
+import { useHistory } from 'react-router-dom'; // 🛑 Asegúrate de que useHistory esté importado
+import { useIonViewWillEnter } from '@ionic/react'; 
 import { add } from 'ionicons/icons'; 
 import { getUsers, User } from '../service/LocalStorageService';
 import './UserList.css'; 
@@ -14,7 +14,7 @@ import './UserList.css';
 const UserList: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const history = useHistory(); 
+  const history = useHistory(); // 🛑 Hook necesario para la navegación
 
   const loadUsers = () => {
     setIsLoading(true);
@@ -23,7 +23,6 @@ const UserList: React.FC = () => {
     setIsLoading(false);
   };
 
-  // 🛑 Recarga los datos al entrar a la vista (incluyendo después de crear un usuario)
   useIonViewWillEnter(() => {
     loadUsers();
   });
@@ -32,9 +31,9 @@ const UserList: React.FC = () => {
     history.push('/create'); 
   };
   
+  // 🛑 Función clave para la navegación a Edición
   const handleItemClick = (userId: string) => {
-      console.log('Navegar para editar usuario:', userId);
-      // history.push(`/edit/${userId}`); // Implementación futura
+    history.push(`/edit/${userId}`); // Usa el ID para construir la URL dinámica
   };
 
   return (
@@ -51,7 +50,6 @@ const UserList: React.FC = () => {
             </IonButton>
           </IonButtons>
         </IonToolbar>
-        {/* Barra de búsqueda (vista en la imagen) */}
         <IonToolbar>
             <IonSearchbar placeholder="Buscar usuarios" />
         </IonToolbar>
@@ -62,10 +60,15 @@ const UserList: React.FC = () => {
         
         <IonList>
           {users.map((user) => (
-            <IonItem key={user.id} detail={true} button onClick={() => handleItemClick(user.id)}> 
+            // 🛑 El IonItem debe ser un botón y llamar a handleItemClick con el ID
+            <IonItem 
+              key={user.id} 
+              detail={true} // Muestra la flecha de navegación (>)
+              button // Hace que el elemento sea interactivo y tenga feedback visual
+              onClick={() => handleItemClick(user.id)} // Llama a la función con el ID del usuario
+            > 
               
               <img 
-                // Usamos photoUrl si existe, si no, un placeholder de avatar
                 src={user.photoUrl || `https://i.pravatar.cc/150?u=${user.id}`} 
                 alt={user.name} 
                 className="user-avatar"

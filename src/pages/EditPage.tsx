@@ -22,19 +22,29 @@ const EditPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const currentUser = getUserById(id);
-        if (currentUser) {
-            setUser(currentUser);
-        } else {
-            presentAlert({
-                header: 'Error',
-                message: `Usuario con ID ${id} no encontrado.`,
-                buttons: [{ text: 'OK', handler: () => history.replace('/list') }],
-            });
+        setLoading(true); 
+        
+        if (id) {
+            const currentUser = getUserById(id);
+            if (currentUser) {
+                setUser(currentUser); 
+            } else {
+                setUser(null); 
+                // Si el usuario no existe, redirigimos después de la alerta.
+                presentAlert({
+                    header: 'Error',
+                    message: `Usuario con ID ${id} no encontrado.`,
+                    buttons: [{ text: 'OK', handler: () => history.replace('/list') }],
+                });
+            }
         }
-        setLoading(false);
-    }, [id, history, presentAlert]);
-
+        
+        // 🛑 CRÍTICO: Asegura que el estado de carga termine inmediatamente
+        setLoading(false); 
+        
+    }, [id, history, presentAlert]); 
+    
+    // La función handleSaveUser se mantiene igual y es correcta.
     const handleSaveUser = (formData: Omit<User, 'id'>) => {
         if (!user) return; 
 
@@ -44,7 +54,6 @@ const EditPage: React.FC = () => {
             id: user.id, 
         };
 
-        // Lógica para mantener la contraseña original si no fue modificada
         if (!('password' in formData) && user.password) {
             updatedUser.password = user.password;
         }
@@ -58,12 +67,19 @@ const EditPage: React.FC = () => {
         });
     };
 
-    if (loading || !user) {
-        return <IonLoading isOpen={true} message="Cargando usuario..." />;
-    }
+    // --- LÓGICA DE RENDERIZADO MEJORADA ---
 
+    // 🛑 1. Muestra el IonLoading en formato OVERLAY
+    // Esto es el equivalente a la imagen que muestra el spinner sobre el contenido
     return (
         <IonPage>
+            {/* IonLoading como Overlay. Se abre si loading=true Y user=null, O si el loading sigue activo */}
+            <IonLoading 
+                isOpen={loading || (!user && !loading)} 
+                message="Cargando usuario..." 
+                spinner="crescent" 
+            /> 
+            
             <IonHeader>
                 <IonToolbar>
                     <IonButtons slot="start"><IonBackButton defaultHref="/list" /></IonButtons>
@@ -71,12 +87,20 @@ const EditPage: React.FC = () => {
                 </IonToolbar>
             </IonHeader>
             <IonContent fullscreen className="ion-padding">
-                <FormComponent 
-                    onSaveUser={handleSaveUser} 
-                    initialData={user} 
-                    submitButtonText="Guardar Cambios" 
-                    isEditing={true} 
-                />
+                
+                {/* 🛑 2. Muestra el Formulario SÓLO si el usuario está cargado (user !== null) */}
+                {!loading && user && (
+                    <FormComponent 
+                        onSaveUser={handleSaveUser} 
+                        initialData={user} 
+                        submitButtonText="Guardar Cambios" 
+                        isEditing={true} 
+                    />
+                )}
+                
+                {/* 3. Muestra un mensaje si la carga terminó pero el usuario es nulo. */}
+                {!loading && !user && <p className="ion-text-center">Error al cargar el usuario. Volviendo a la lista...</p>}
+
             </IonContent>
         </IonPage>
     );
