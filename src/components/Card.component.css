@@ -1,0 +1,6 @@
+/* Styles (ej: en el CSS de la página que lo use) */
+.action-buttons-group {
+    display: flex;
+    align-items: center;
+    gap: 5px; 
+}

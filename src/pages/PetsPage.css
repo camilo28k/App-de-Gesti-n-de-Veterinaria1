@@ -1,0 +1,8 @@
+/* src/pages/PetsPage.css */
+
+/* Estilos para asegurar que los botones de acción se alineen correctamente */
+.action-buttons-group {
+    display: flex;
+    align-items: center;
+    gap: 5px; 
+}   

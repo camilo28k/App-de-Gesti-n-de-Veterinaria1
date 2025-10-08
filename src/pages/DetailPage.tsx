@@ -1,119 +1,177 @@
-// src/pages/DetailPage.tsx (Solución para el 'Loading' persistente)
+// src/pages/DetailPage.tsx (NUEVO ARCHIVO)
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
-    IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonLoading, 
-    IonBackButton, IonButtons, IonItem, IonLabel, IonNote, IonIcon, 
-    IonGrid, IonRow, IonCol, IonCard, IonCardContent, IonButton, useIonAlert
+    IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, 
+    IonIcon, IonButtons, IonBackButton, IonList, IonItem, IonLabel, 
+    IonNote, useIonViewWillEnter, IonSpinner
 } from '@ionic/react';
 import { useHistory, useParams } from 'react-router-dom';
-import { create } from 'ionicons/icons';
-import { getUserById, User } from '../service/LocalStorageService'; 
+import { create, mailOutline, calendarOutline, personOutline } from 'ionicons/icons';
+import { getUserById, User } from '../service/LocalStorageService';
 
+// Definimos los parámetros de la ruta (solo necesitamos el 'id')
 interface RouteParams {
-    id: string;
+  id: string;
 }
 
 const DetailPage: React.FC = () => {
-    const { id } = useParams<RouteParams>(); 
+    const { id } = useParams<RouteParams>();
     const history = useHistory();
-    const [presentAlert] = useIonAlert();
+    
+    // Estado para los datos del usuario y el estado de carga
     const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
 
-    // 🛑 CRÍTICO: La lógica de carga DEBE ejecutarse solo al montar o si cambia el ID
-    useEffect(() => {
-        // Marcamos la carga al iniciar
-        setLoading(true); 
-        
-        if (id) {
-            const currentUser = getUserById(id);
-            if (currentUser) {
-                setUser(currentUser); 
-            } else {
-                // Usuario no encontrado: Limpiamos y mostramos alerta
-                setUser(null); 
-                presentAlert({
-                    header: 'Error',
-                    message: `Usuario con ID ${id} no encontrado.`,
-                    buttons: [{ text: 'OK', handler: () => history.replace('/list') }],
-                });
-            }
-        }
-        
-        // Marcamos el fin de la carga *inmediatamente* después de la búsqueda síncrona
-        setLoading(false); 
-        
-    }, [id, history, presentAlert]); // Dependencias correctas
-
-    const handleEdit = () => {
-        history.push(`/edit/${id}`);
+    const loadUser = () => {
+        setIsLoading(true);
+        const foundUser = getUserById(id);
+        setUser(foundUser || null);
+        setIsLoading(false);
     };
 
-    // --- LÓGICA DE RENDERIZADO ---
+    useIonViewWillEnter(() => {
+        loadUser();
+    });
+
+    // Función para navegar al formulario de edición
+    const handleEdit = () => {
+        // 🛑 Usamos la ruta correcta con el prefijo /users/
+        history.push(`/users/edit/${id}`); 
+    };
+
+    const formatReadableDate = (timestamp: string | undefined): string => {
+        if (!timestamp) return 'N/A';
+        try {
+            // El ID que generamos con Date.now() es un timestamp
+            const date = new Date(parseInt(timestamp));
+            // Ejemplo: 7 de octubre de 2025
+            return date.toLocaleDateString('es-ES', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        } catch (e) {
+            return timestamp; // Devuelve el timestamp crudo si falla la conversión
+        }
+    };
+
+
+    if (isLoading) {
+        return (
+            <IonPage>
+                <IonHeader>
+                    <IonToolbar>
+                        <IonButtons slot="start">
+                            <IonBackButton defaultHref="/users/list" />
+                        </IonButtons>
+                        <IonTitle>Cargando...</IonTitle>
+                    </IonToolbar>
+                </IonHeader>
+                <IonContent fullscreen className="ion-padding ion-text-center">
+                    <div className="ion-padding-top">
+                        <IonSpinner name="crescent" />
+                        <p>Cargando detalles...</p>
+                    </div>
+                </IonContent>
+            </IonPage>
+        );
+    }
+
+    if (!user) {
+        return (
+            <IonPage>
+                <IonHeader>
+                    <IonToolbar>
+                        <IonButtons slot="start">
+                            <IonBackButton defaultHref="/users/list" />
+                        </IonButtons>
+                        <IonTitle>Usuario No Encontrado</IonTitle>
+                    </IonToolbar>
+                </IonHeader>
+                <IonContent fullscreen className="ion-padding ion-text-center">
+                    <p>El usuario con ID "{id}" no existe.</p>
+                </IonContent>
+            </IonPage>
+        );
+    }
     
-    // Muestra el IonLoading como overlay durante la carga
-    // La condición 'loading' debe ser suficiente si el useEffect es correcto.
+    // Si el usuario existe, renderizamos los detalles
     return (
         <IonPage>
-            <IonLoading 
-                isOpen={loading} 
-                message="Cargando detalles..." 
-                spinner="crescent" 
-            /> 
-            
             <IonHeader>
                 <IonToolbar>
-                    <IonButtons slot="start"><IonBackButton defaultHref="/list" /></IonButtons>
+                    <IonButtons slot="start">
+                        <IonBackButton defaultHref="/users/list" />
+                    </IonButtons>
                     <IonTitle>Detalles del Usuario</IonTitle>
                 </IonToolbar>
             </IonHeader>
-            <IonContent fullscreen className="ion-padding ion-text-center">
+            <IonContent fullscreen>
                 
-                {/* 🛑 CRÍTICO: Solo renderizamos el contenido si la carga terminó Y el usuario fue encontrado */}
-                {!loading && user && (
-                    <>
-                        <div className="ion-padding-vertical">
-                            <img 
-                                src={user.photoUrl || 'https://i.pravatar.cc/150?img=6'} 
-                                alt={user.name} 
-                                style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover' }} 
-                            />
-                            <h2 className="ion-no-margin ion-padding-top">{user.name}</h2>
-                            <p className="ion-text-sm ion-margin-bottom">{user.email}</p>
-                            <IonNote color="primary" className="ion-margin-end ion-padding-horizontal">
-                                {user.role}
-                            </IonNote>
-                            <IonNote color="success" className="ion-padding-horizontal">
-                                {user.status}
-                            </IonNote>
-                        </div>
-        
-                        <IonCard className="ion-margin-top ion-text-start">
-                            <IonCardContent>
-                                <h3>Información del Usuario</h3>
-                                <IonGrid className="detail-grid">
-                                    <IonRow><IonCol size="6">Nombre Completo</IonCol><IonCol size="6" className="ion-text-end">{user.name}</IonCol></IonRow>
-                                    <IonRow><IonCol size="6">Correo Electrónico</IonCol><IonCol size="6" className="ion-text-end">{user.email}</IonCol></IonRow>
-                                    <IonRow><IonCol size="6">Rol</IonCol><IonCol size="6" className="ion-text-end">{user.role}</IonCol></IonRow>
-                                    <IonRow><IonCol size="6">Estado</IonCol><IonCol size="6" className="ion-text-end">{user.status}</IonCol></IonRow>
-                                    <IonRow><IonCol size="6">Fecha de Creación</IonCol><IonCol size="6" className="ion-text-end">{new Date(parseInt(user.id)).toLocaleDateString('es-ES')}</IonCol></IonRow>
-                                </IonGrid>
-                            </IonCardContent>
-                        </IonCard>
-                        
-                        <div className="ion-padding-vertical">
-                            <IonButton expand="block" color="success" onClick={handleEdit}>
-                                <IonIcon slot="start" icon={create} />
-                                Editar
-                            </IonButton>
-                        </div>
-                    </>
-                )}
-                
-                {/* Mensaje de fallback si la carga termina pero no hay usuario (solo se ve brevemente antes de la redirección) */}
-                {!loading && !user && <p className="ion-text-center">El usuario no pudo ser cargado.</p>}
+                {/* Cabecera del perfil, imitando la tarjeta de la imagen */}
+                <div className="profile-header ion-padding ion-text-center">
+                    <img 
+                        src={user.photoUrl || `https://i.pravatar.cc/150?u=${user.id}`} 
+                        alt={user.name} 
+                        className="profile-avatar"
+                        style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', margin: '10px auto' }}
+                    />
+                    <h2>{user.name}</h2>
+                    <p className="ion-text-muted">{user.email}</p>
+                    
+                    {/* Tags de Rol y Estado */}
+                    <div className="ion-padding-bottom">
+                        <IonNote className="role-tag ion-margin-end">{user.role}</IonNote>
+                        <IonNote className={`status-tag ${user.status === 'Activo' ? 'active' : 'inactive'}`}>
+                            {user.status}
+                        </IonNote>
+                    </div>
+                </div>
 
+                {/* Lista de Información del Usuario */}
+                <h3 className="ion-padding-horizontal ion-padding-top">Información del Usuario</h3>
+                <IonList lines="full" className="ion-no-margin">
+                    
+                    <IonItem>
+                        <IonIcon icon={personOutline} slot="start" />
+                        <IonLabel>Nombre Completo</IonLabel>
+                        <IonNote slot="end">{user.name}</IonNote>
+                    </IonItem>
+                    
+                    <IonItem>
+                        <IonIcon icon={mailOutline} slot="start" />
+                        <IonLabel>Correo Electrónico</IonLabel>
+                        <IonNote slot="end">{user.email}</IonNote>
+                    </IonItem>
+                    
+                    <IonItem>
+                        <IonLabel>Rol</IonLabel>
+                        <IonNote slot="end">{user.role}</IonNote>
+                    </IonItem>
+                    
+                    <IonItem>
+                        <IonLabel>Estado</IonLabel>
+                        <IonNote slot="end">{user.status}</IonNote>
+                    </IonItem>
+                    
+                    <IonItem>
+                        <IonIcon icon={calendarOutline} slot="start" />
+                        <IonLabel>Fecha de Creación</IonLabel>
+                        {/* Asumimos que el ID es un timestamp de creación */}
+                        <IonNote slot="end">{formatReadableDate(user.id)}</IonNote> 
+                    </IonItem>
+                    
+                </IonList>
+
+                {/* Botón de Edición (Navega a /users/edit/:id) */}
+                <div className="ion-padding">
+                    <IonButton expand="block" color="success" onClick={handleEdit}>
+                        <IonIcon slot="start" icon={create} />
+                        EDITAR
+                    </IonButton>
+                </div>
+                
             </IonContent>
         </IonPage>
     );
